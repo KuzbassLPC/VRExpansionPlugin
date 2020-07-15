@@ -63,6 +63,16 @@ enum class EVRInteractibleLeverReturnType : uint8
 	RetainMomentum
 };
 
+/* Use AllCurrentNormalizeAngles */
+UENUM(Blueprintable)
+enum class EKCNormalizedLeverAxis : uint8
+{
+	None,
+	Axis_X,
+	Axis_Y,
+	Axis_XY
+};
+
 /** Delegate for notification when the lever state changes. */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FVRLeverStateChangedSignature, bool, LeverStatus, EVRInteractibleLeverEventType, LeverStatusType, float, LeverAngleAtTime);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FVRLeverFinishedLerpingSignature, float, FinalAngle);
@@ -102,6 +112,10 @@ public:
 	// Writes out all current angles to this rotator, useful mostly for XY and Flight stick modes
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRLeverComponent")
 		FRotator AllCurrentLeverAngles;
+
+		// Writes out all normalize angles to this vector
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRLeverComponent")
+		FVector AllCurrentNormalizeAngles;
 
 	// Bearing Direction, for X/Y is their signed direction, for XY mode it is an actual 2D directional vector
 	UPROPERTY(BlueprintReadOnly, Category = "VRLeverComponent")
@@ -162,6 +176,18 @@ public:
 	// Maximum momentum of the lever in degrees per second
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRLeverComponent|Momentum Settings", meta = (ClampMin = "0.0", UIMin = "0.0"))
 		float MaxLeverMomentum;
+
+		// Normalize angle to range
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRLeverComponent|Normalize Settings")
+		EKCNormalizedLeverAxis NormalizeAxis;
+
+	// Range Min Normalize
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRLeverComponent|Normalize Settings")
+		float RangeMin;
+
+	// Range Max Normalize
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRLeverComponent|Normalize Settings")
+		float RangeMax;
 
 	UPROPERTY(BlueprintReadOnly, Category = "VRLeverComponent")
 		bool bIsLerping;

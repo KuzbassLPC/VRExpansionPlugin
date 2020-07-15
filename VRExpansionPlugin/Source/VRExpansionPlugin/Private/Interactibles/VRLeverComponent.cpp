@@ -1,6 +1,7 @@
 // Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
 
 #include "Interactibles/VRLeverComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 
   //=============================================================================
@@ -44,6 +45,10 @@ UVRLeverComponent::UVRLeverComponent(const FObjectInitializer& ObjectInitializer
 	MaxLeverMomentum = 180.0f;
 	FramesToAverage = 3;
 
+	NormalizeAxis = EKCNormalizedLeverAxis::None;
+	RangeMin = 0.0f;
+	RangeMax = 30.0f;
+
 	bBlendAxisValuesByAngleThreshold = false;
 	AngleThreshold = 90.0f;
 
@@ -55,6 +60,7 @@ UVRLeverComponent::UVRLeverComponent(const FObjectInitializer& ObjectInitializer
 	InitialInteractorLocation = FVector::ZeroVector;
 	InteractorOffsetTransform = FTransform::Identity;
 	AllCurrentLeverAngles = FRotator::ZeroRotator;
+	AllCurrentNormalizeAngles = FVector::ZeroVector;
 	InitialGripRot = 0.0f;
 	qRotAtGrab = FQuat::Identity;
 	bIsLerping = false;
@@ -798,6 +804,27 @@ void UVRLeverComponent::CalculateCurrentAngle(FTransform & CurrentTransform)
 		AllCurrentLeverAngles = UVRInteractibleFunctionLibrary::SetAxisValueRot((EVRInteractibleAxis)LeverRotationAxis, CurrentLeverAngle, FRotator::ZeroRotator);
 
 	}break;
+	}
+
+	switch (NormalizeAxis)
+	{
+	case EKCNormalizedLeverAxis::Axis_X:
+	{
+		AllCurrentNormalizeAngles.X = UKismetMathLibrary::NormalizeToRange(CurrentLeverAngle, RangeMin, RangeMax);
+	}
+	break;
+	case EKCNormalizedLeverAxis::Axis_Y:
+	{
+		AllCurrentNormalizeAngles.Y = UKismetMathLibrary::NormalizeToRange(CurrentLeverAngle, RangeMin, RangeMax);
+	}
+	break;
+	case EKCNormalizedLeverAxis::Axis_XY:
+	{
+		AllCurrentNormalizeAngles.X = UKismetMathLibrary::NormalizeToRange(AllCurrentLeverAngles.Roll, RangeMin, RangeMax);
+		AllCurrentNormalizeAngles.Y = UKismetMathLibrary::NormalizeToRange(AllCurrentLeverAngles.Pitch, RangeMin, RangeMax);
+	}
+	break;
+	default: {} break;
 	}
 }
 

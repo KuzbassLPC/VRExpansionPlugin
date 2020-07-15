@@ -73,6 +73,7 @@ public class VRExpansionPlugin : ModuleRules
                     "AIModule",
                     "Json",
                     "JsonUtilities",
+                    "Niagara"
 
                     //"Renderer",
                     //"UtilityShaders"
