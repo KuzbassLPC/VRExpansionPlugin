@@ -1010,7 +1010,7 @@ bool UGripMotionControllerComponent::DropObject(
 	return false;
 }
 
-bool UGripMotionControllerComponent::GripObjectByInterface(UObject * ObjectToGrip, const FTransform &WorldOffset, bool bWorldOffsetIsRelative, FName OptionalBoneToGripName, bool bIsSlotGrip)
+bool UGripMotionControllerComponent::GripObjectByInterface(UObject* ObjectToGrip, const FTransform& WorldOffset, bool bWorldOffsetIsRelative, FName OptionalSnapToSocketName, FName OptionalBoneToGripName, bool bIsSlotGrip)
 {
 	if (UPrimitiveComponent * PrimComp = Cast<UPrimitiveComponent>(ObjectToGrip))
 	{
@@ -1027,7 +1027,7 @@ bool UGripMotionControllerComponent::GripObjectByInterface(UObject * ObjectToGri
 			float Damping;
 			IVRGripInterface::Execute_GetGripStiffnessAndDamping(PrimComp, Stiffness, Damping);
 
-			return GripComponent(PrimComp, WorldOffset, bWorldOffsetIsRelative, NAME_None,
+			return GripComponent(PrimComp, WorldOffset, bWorldOffsetIsRelative, OptionalSnapToSocketName,
 				OptionalBoneToGripName,
 				CollisionType,
 				IVRGripInterface::Execute_GripLateUpdateSetting(PrimComp),
@@ -1045,7 +1045,7 @@ bool UGripMotionControllerComponent::GripObjectByInterface(UObject * ObjectToGri
 			float Damping;
 			IVRGripInterface::Execute_GetGripStiffnessAndDamping(Owner, Stiffness, Damping);
 
-			return GripComponent(PrimComp, WorldOffset, bWorldOffsetIsRelative, NAME_None,
+			return GripComponent(PrimComp, WorldOffset, bWorldOffsetIsRelative, OptionalSnapToSocketName,
 				OptionalBoneToGripName,
 				CollisionType,
 				IVRGripInterface::Execute_GripLateUpdateSetting(Owner),
@@ -1077,7 +1077,7 @@ bool UGripMotionControllerComponent::GripObjectByInterface(UObject * ObjectToGri
 			float Damping;
 			IVRGripInterface::Execute_GetGripStiffnessAndDamping(root, Stiffness, Damping);
 
-			return GripActor(Actor, WorldOffset, bWorldOffsetIsRelative, NAME_None,
+			return GripActor(Actor, WorldOffset, bWorldOffsetIsRelative, OptionalSnapToSocketName,
 				OptionalBoneToGripName,
 				CollisionType,
 				IVRGripInterface::Execute_GripLateUpdateSetting(root),
@@ -1095,7 +1095,7 @@ bool UGripMotionControllerComponent::GripObjectByInterface(UObject * ObjectToGri
 			float Damping;
 			IVRGripInterface::Execute_GetGripStiffnessAndDamping(Actor, Stiffness, Damping);
 
-			return GripActor(Actor, WorldOffset, bWorldOffsetIsRelative, NAME_None,
+			return GripActor(Actor, WorldOffset, bWorldOffsetIsRelative, OptionalSnapToSocketName,
 				OptionalBoneToGripName,
 				CollisionType,
 				IVRGripInterface::Execute_GripLateUpdateSetting(Actor),
@@ -1328,6 +1328,7 @@ bool UGripMotionControllerComponent::GripActor(
 	newActorGrip.ValueCache.bWasInitiallyRepped = true; // Set this true on authority side so we can skip a function call on tick
 	newActorGrip.bIsSlotGrip = bIsSlotGrip;
 	newActorGrip.GrippedBoneName = OptionalBoneToGripName;
+	newActorGrip.GrippedSocketName = OptionalSnapToSocketName;
 
 	// Ignore late update setting if it doesn't make sense with the grip
 	switch(newActorGrip.GripCollisionType)
@@ -1360,7 +1361,8 @@ bool UGripMotionControllerComponent::GripActor(
 
 	newActorGrip.GripTargetType = EGripTargetType::ActorGrip;
 
-	if (OptionalSnapToSocketName.IsValid() && root->DoesSocketExist(OptionalSnapToSocketName))
+	// add bIsSlotGrip condition for correct saving OptionalSnapToSocketName
+	if (bIsSlotGrip && OptionalSnapToSocketName.IsValid() && root->DoesSocketExist(OptionalSnapToSocketName))
 	{
 		// I inverse it so that laying out the sockets makes sense
 		FTransform sockTrans = root->GetSocketTransform(OptionalSnapToSocketName, ERelativeTransformSpace::RTS_Component);
@@ -1561,6 +1563,7 @@ bool UGripMotionControllerComponent::GripComponent(
 	newComponentGrip.ValueCache.bWasInitiallyRepped = true; // Set this true on authority side so we can skip a function call on tick
 	newComponentGrip.bIsSlotGrip = bIsSlotGrip;
 	newComponentGrip.GrippedBoneName = OptionalBoneToGripName;
+	newComponentGrip.GrippedSocketName = OptionalSnapToSocketName;
 
 	// Ignore late update setting if it doesn't make sense with the grip
 	switch (newComponentGrip.GripCollisionType)
@@ -1597,7 +1600,8 @@ bool UGripMotionControllerComponent::GripComponent(
 	else
 		newComponentGrip.GripMovementReplicationSetting = GripMovementReplicationSetting;
 
-	if (OptionalSnapToSocketName.IsValid() && ComponentToGrip->DoesSocketExist(OptionalSnapToSocketName))
+	// add bIsSlotGrip condition for correct saving OptionalSnapToSocketName
+	if (bIsSlotGrip && OptionalSnapToSocketName.IsValid() && ComponentToGrip->DoesSocketExist(OptionalSnapToSocketName))
 	{
 		// I inverse it so that laying out the sockets makes sense
 		FTransform sockTrans = ComponentToGrip->GetSocketTransform(OptionalSnapToSocketName, ERelativeTransformSpace::RTS_Component);

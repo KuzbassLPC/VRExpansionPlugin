@@ -1190,6 +1190,8 @@ public:
 		bool bIsSlotGrip;
 	UPROPERTY(BlueprintReadWrite, Category = "Settings")
 		FName GrippedBoneName;
+	UPROPERTY(BlueprintReadWrite, Category = "Settings")
+		FName GrippedSocketName;
 	UPROPERTY(BlueprintReadOnly, Category = "Settings")
 		EGripMovementReplicationSettings GripMovementReplicationSetting;
 

@@ -778,7 +778,8 @@ public:
 
 	// Auto grip any uobject that is/root is a primitive component
 	UFUNCTION(BlueprintCallable, Category = "GripMotionController")
-		bool GripObjectByInterface(UObject * ObjectToGrip, const FTransform &WorldOffset, bool bWorldOffsetIsRelative = false, FName OptionalBoneToGripName = NAME_None, bool bIsSlotGrip = false);
+		bool GripObjectByInterface(UObject* ObjectToGrip, const FTransform& WorldOffset, bool bWorldOffsetIsRelative = false,
+			FName OptionalSnapToSocketName = NAME_None, FName OptionalBoneToGripName = NAME_None, bool bIsSlotGrip = false);
 
 	// Auto drop any uobject that is/root is a primitive component and has the VR Grip Interface
 	// If an object is passed in it will attempt to drop it, otherwise it will attempt to find and drop the given grip id

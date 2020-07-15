@@ -1,4 +1,5 @@
 // Some copyright should be here...
+using System.Globalization;
 using System.IO;
 using UnrealBuildTool;
 
@@ -70,6 +71,8 @@ public class VRExpansionPlugin : ModuleRules
                     "UMG",
                     "NavigationSystem",
                     "AIModule",
+                    "Json",
+                    "JsonUtilities",
 
                     //"Renderer",
                     //"UtilityShaders"
